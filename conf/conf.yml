@@ -1,0 +1,9 @@
+server:
+  port: "8100"
+
+db:
+  name: "proxy_ip"
+  host: "localhost"
+  port: 3306
+  user: "root"
+  pwd: "qwer1234@QW"
