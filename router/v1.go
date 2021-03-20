@@ -23,8 +23,6 @@ func HttpServer() {
 }
 
 func v1(engine *gin.Engine) {
-	v1 := engine.Group("/proxy/v1")
-
-	brows := v1.Group("/brows")
-	brows.GET("/ip", IP)
+	v1 := engine.Group("/v1")
+	v1.GET("/ip", IP)
 }

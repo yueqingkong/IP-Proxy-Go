@@ -36,12 +36,8 @@ func Crawl() {
 		&plat.IP3366{}, &plat.KuaiDaiLi{},
 		&plat.ProxyListPlus{}, &plat.Pzzqz{}}
 
-	for _, p := range plats {
-		go p.Create()
-	}
-
 	// 定时器轮训
-	ticker := time.NewTicker(30 * time.Minute)
+	ticker := time.NewTicker(1 * time.Minute)
 	select {
 	case <-ticker.C:
 		log.Print("轮循 ip")
@@ -53,34 +49,38 @@ func Crawl() {
 }
 
 func ConnectCheck() {
-	start := int64(0)
-
 	// 定时器轮训
-	ticker := time.NewTicker(30 * time.Minute)
+	ticker := time.NewTicker(1 * time.Minute)
 	select {
 	case <-ticker.C:
-		ips := db.XORM().AllIps(start)
-		if len(ips) == 0 {
-			start = 0
-		} else {
-			for i := 0; i < len(ips); i++ {
-				ip := ips[i]
-				if i == len(ips)-1 {
-					start = ip.Id
-				}
+		log.Println("轮训 删除ip")
 
-				code, _ := plat.ProxyCheck(fmt.Sprintf("http://%s", ip.Address))
-				if code != http.StatusOK {
-					if ip.ErrorCount >= 5 {
-						db.XORM().Delete(ip.Id)
-					} else {
-						ip.ErrorCount = ip.ErrorCount + 1
-						db.XORM().UpdateIp(ip)
-					}
+		ips := db.XORM().AllIps()
+		for i := 0; i < len(ips); i++ {
+			ip := ips[i]
+
+			code, speed := plat.ProxyCheck(fmt.Sprintf("http://%s", ip.Address))
+			if code != http.StatusOK {
+				if ip.ErrorCount >= 2 {
+					log.Print("[删除] ", ip.Address)
+					db.XORM().Delete(ip.Id)
+				} else {
+					t := time.Now()
+
+					ip.Timestamp = t.Unix()
+					ip.CreateTime = t
+					ip.ErrorCount = ip.ErrorCount + 1
+					db.XORM().UpdateIp(ip)
 				}
+			} else {
+				t := time.Now()
+
+				ip.Speed = speed
+				ip.Timestamp = t.Unix()
+				ip.CreateTime = t
+				db.XORM().UpdateIp(ip)
 			}
 		}
-		break
 	}
 }
 

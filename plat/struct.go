@@ -46,7 +46,7 @@ func ProxyCheck(address string) (statusCode int, speed int32) {
 	// 使用代理ip访问测试地址
 	res, err := httpClient.Do(reqest)
 	if err != nil {
-		log.Print(err)
+		// log.Print(err)
 		return 0, http.StatusBadRequest
 	}
 	defer res.Body.Close()

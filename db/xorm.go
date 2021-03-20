@@ -73,10 +73,9 @@ func (self *XOrm) GetIPOne() (*IP, error) {
 	return ip, err
 }
 
-
 func (self *XOrm) GetIPById(id int64) (*IP, error) {
 	ip := &IP{}
-	_, err := engine.Where("id > ?", id).Limit(1).Get(ip)
+	_, err := engine.Where("id > ? and speed < 5000", id).Limit(1).Get(ip)
 	if err != nil {
 		log.Print(err)
 	}
@@ -94,9 +93,9 @@ func (self *XOrm) GetIP(address string) (*IP, error) {
 	return ip, err
 }
 
-func (self *XOrm) AllIps(id int64) []IP {
+func (self *XOrm) AllIps() []IP {
 	var ips []IP
-	err := engine.Where("id > ?", id).Limit(100).Find(&ips)
+	err := engine.Where("id > ?", 0).Find(&ips)
 	if err != nil {
 		log.Print(err)
 	}
